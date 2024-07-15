@@ -4,15 +4,26 @@ import {
   getLivreurs,
   getLivreurById,
   updateLivreur,
-  deleteLivreur
+  deleteLivreur,
+  getAvailableLivreurs,
+  addUnavailablePeriod,
+  updateUnavailablePeriod,
+  deleteUnavailablePeriod
 } from '../controllers/livreurController';
 
 const router = express.Router();
 
-router.post('/livreurs', createLivreur);
-router.get('/livreurs', getLivreurs);
-router.get('/livreurs/:id', getLivreurById);
-router.put('/livreurs/:id', updateLivreur);
-router.delete('/livreurs/:id', deleteLivreur);
+router.post('/', createLivreur);
+router.get('/', getLivreurs);
+router.get('/:id', getLivreurById);
+router.get('/available', getAvailableLivreurs);
+router.put('/:id', updateLivreur);
+router.delete('/:id', deleteLivreur);
+
+// Routes pour les périodes d'indisponibilité
+router.post('/:livreurId/unavailable', addUnavailablePeriod);
+router.put('/:livreurId/unavailable/:periodId', updateUnavailablePeriod);
+router.delete('/:livreurId/unavailable/:periodId', deleteUnavailablePeriod);
+
 
 export default router;

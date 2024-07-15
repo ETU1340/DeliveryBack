@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import livreurRoutes from './routes/livreurRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
+import deliveryRoutes from './routes/deliveryRoutes';
+import protect from './middlewares/auth';
 // Import other routes here
 
 dotenv.config();
@@ -18,8 +20,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api', livreurRoutes);
-app.use('/api', scheduleRoutes);
+app.use('/api/livreurs', protect,livreurRoutes);
+app.use('/api/schedules',protect, scheduleRoutes);
+app.use('/api/deliveries',protect, deliveryRoutes);
 // Use other routes here
 
 const PORT = process.env.PORT || 5000;

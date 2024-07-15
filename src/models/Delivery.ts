@@ -7,6 +7,10 @@ const DeliverySchema = new mongoose.Schema({
   deliveryDate: { type: Date, required: true }, // Date de la livraison
   startTime: { type: String, required: true }, // Heure de début de la livraison (ex: "09:00")
   endTime: { type: String, required: true },   // Heure de fin de la livraison (ex: "09:30")
+  deliveryLocation: {
+    type: { type: String, enum: ['Point'], required: true },
+    coordinates: { type: [Number], required: true }
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

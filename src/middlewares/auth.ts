@@ -1,21 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-// Définir l'interface pour les données utilisateur dans le token
-interface DecodedToken {
-    userId: string;
-    email: string;
-}
-
 // Ajouter les propriétés personnalisées à l'interface Request
-declare module 'express-serve-static-core' {
-    interface Request {
-        userConnected?: {
-            id: string;
-            role: string;
-        };
-    }
-}
 
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     // Get token from header
@@ -27,7 +13,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
     // Verify token
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as DecodedToken;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
         req.userConnected = { id: decoded.id, role: decoded.role };
         next();
     } catch (err) {

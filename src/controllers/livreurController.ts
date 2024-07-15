@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import {Livreur} from '../models/Livreur';
+import Livreur  from '../models/Livreur';
 var hal = require('hal');
 import { generateHALLinks } from '../services/halLinks';
 
@@ -135,3 +135,154 @@ export const createLivreur = async (req: Request, res: Response) => {
       res.status(400).json({ error });
     }
   };
+
+
+
+// Récupérer les livreurs disponibles les plus proches (suggestion de livreur d'une planification, se referer par rapport à la premiére livraison)
+export const getAvailableLivreurs = async (req: Request, res: Response) => {
+  const { deliveryDate, startTime, endTime, deliveryLat, deliveryLong } = req.query;
+
+  try {
+    const startDateTime = new Date(`${deliveryDate}T${startTime}:00Z`);
+    const endDateTime = new Date(`${deliveryDate}T${endTime}:00Z`);
+    const deliveryLocation = {
+      type: 'Point',
+      coordinates: [parseFloat(deliveryLong as string), parseFloat(deliveryLat as string)]
+    };
+
+    const livreurs = await Livreur.find({
+      currentLocation: {
+        $near: {
+          $geometry: deliveryLocation
+        }
+      },
+      $or: [
+        { unavailablePeriods: { $size: 0 } },
+        { unavailablePeriods: { 
+            $not: { 
+              $elemMatch: {
+                startDate: { $lt: endDateTime },
+                endDate: { $gt: startDateTime }
+              }
+            }
+          }
+        }
+      ]
+    });
+
+    const resources = new hal.Resource(
+      { count: livreurs.length, livreurs: livreurs.map(livreur => livreur.toObject()) },
+      `/api/livreurs/available`
+    );
+
+    const collectionLinks = generateHALLinks(`/api/livreurs/available`, {
+      list: { href: `/api/livreurs`, method: 'GET' },
+      create: { href: `/api/livreurs`, method: 'POST' }
+    });
+    resources.link(collectionLinks);
+
+    res.status(200).json(resources.toJSON());
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+};
+// Ajouter une période d'indisponibilité
+export const addUnavailablePeriod = async (req: Request, res: Response) => {
+  const { livreurId } = req.params;
+  const { startDate, endDate, reason } = req.body;
+
+  try {
+    const livreur = await Livreur.findById(livreurId);
+    if (!livreur) {
+      return res.status(404).json({ message: 'Livreur not found' });
+    }
+
+    livreur.unavailablePeriods.push({ startDate, endDate, reason });
+    await livreur.save();
+
+    const resource = new hal.Resource(
+      { message: 'Unavailable period added successfully', unavailablePeriods: livreur.unavailablePeriods },
+      `/api/livreurs/${livreurId}/unavailable`
+    );
+    const links = generateHALLinks(`/api/livreurs/${livreurId}/unavailable`, {
+      self: { href: `/api/livreurs/${livreurId}/unavailable`, method: 'POST' },
+      getLivreur: { href: `/api/livreurs/${livreurId}`, method: 'GET' }
+    });
+    resource.link(links);
+
+    res.status(201).json(resource.toJSON());
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+};
+
+// Mettre à jour une période d'indisponibilité
+export const updateUnavailablePeriod = async (req: Request, res: Response) => {
+  const { livreurId, periodId } = req.params;
+  const { startDate, endDate, reason } = req.body;
+
+  try {
+    const livreur = await Livreur.findById(livreurId);
+    if (!livreur) {
+      return res.status(404).json({ message: 'Livreur not found' });
+    }
+
+    const period = livreur.unavailablePeriods.id(periodId);
+    if (!period) {
+      return res.status(404).json({ message: 'Unavailable period not found' });
+    }
+
+    period.startDate = startDate;
+    period.endDate = endDate;
+    period.reason = reason;
+    await livreur.save();
+
+    const resource = new hal.Resource(
+      { message: 'Unavailable period updated successfully', unavailablePeriods: livreur.unavailablePeriods },
+      `/api/livreurs/${livreurId}/unavailable/${periodId}`
+    );
+    const links = generateHALLinks(`/api/livreurs/${livreurId}/unavailable/${periodId}`, {
+      self: { href: `/api/livreurs/${livreurId}/unavailable/${periodId}`, method: 'PUT' },
+      getLivreur: { href: `/api/livreurs/${livreurId}`, method: 'GET' }
+    });
+    resource.link(links);
+
+    res.status(200).json(resource.toJSON());
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+};
+
+// Supprimer une période d'indisponibilité
+export const deleteUnavailablePeriod = async (req: Request, res: Response) => {
+  const { livreurId, periodId } = req.params;
+
+  try {
+    const livreur = await Livreur.findById(livreurId) ;
+    if (!livreur) {
+      return res.status(404).json({ message: 'Livreur not found' });
+    }
+
+    const period = livreur.unavailablePeriods.id(periodId);
+    if (!period) {
+      return res.status(404).json({ message: 'Unavailable period not found' });
+    }
+
+    period.remove();
+    await livreur.save();
+
+    const resource = new hal.Resource(
+      { message: 'Unavailable period deleted successfully', unavailablePeriods: livreur.unavailablePeriods },
+      `/api/livreurs/${livreurId}/unavailable/${periodId}`
+    );
+    const links = generateHALLinks(`/api/livreurs/${livreurId}/unavailable/${periodId}`, {
+      self: { href: `/api/livreurs/${livreurId}/unavailable/${periodId}`, method: 'DELETE' },
+      getLivreur: { href: `/api/livreurs/${livreurId}`, method: 'GET' }
+    });
+    resource.link(links);
+
+    res.status(200).json(resource.toJSON());
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+};
