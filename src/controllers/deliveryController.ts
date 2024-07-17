@@ -6,7 +6,12 @@ import { generateHALLinks } from '../services/halLinks';
 // Créer une demande de livraison
 export const createDeliveryRequest = async (req: Request, res: Response) => {
   const {deliveryDate, startTime, endTime, deliveryLat, deliveryLong } = req.body;
-  let clientId = req.userConnected.id; 
+  const userConnected = req.userConnected; // Ajoutez une variable intermédiaire
+
+  if (!userConnected) {
+    return res.status(401).json({ msg: 'User not authenticated' });
+  }
+  let clientId = userConnected.id; 
   try {
     const deliveryLocation = {
       type: 'Point',
@@ -43,7 +48,12 @@ export const createDeliveryRequest = async (req: Request, res: Response) => {
 
 export const validateDelivery = async (req: Request, res: Response) => {
 const { deliveryId } = req.params;
-let clientId = req.userConnected.id; 
+const userConnected = req.userConnected; // Ajoutez une variable intermédiaire
+
+if (!userConnected) {
+  return res.status(401).json({ msg: 'User not authenticated' });
+}
+let clientId = userConnected.id; 
 
 try {
     const delivery = await Delivery.findById(deliveryId);

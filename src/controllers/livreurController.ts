@@ -237,17 +237,7 @@ export const updateUnavailablePeriod = async (req: Request, res: Response) => {
     period.reason = reason;
     await livreur.save();
 
-    const resource = new hal.Resource(
-      { message: 'Unavailable period updated successfully', unavailablePeriods: livreur.unavailablePeriods },
-      `/api/livreurs/${livreurId}/unavailable/${periodId}`
-    );
-    const links = generateHALLinks(`/api/livreurs/${livreurId}/unavailable/${periodId}`, {
-      self: { href: `/api/livreurs/${livreurId}/unavailable/${periodId}`, method: 'PUT' },
-      getLivreur: { href: `/api/livreurs/${livreurId}`, method: 'GET' }
-    });
-    resource.link(links);
-
-    res.status(200).json(resource.toJSON());
+    res.status(200).json({ message: 'Unavailable period updated successfully', unavailablePeriods: livreur.unavailablePeriods });
   } catch (error) {
     res.status(400).json({ error });
   }
@@ -268,7 +258,7 @@ export const deleteUnavailablePeriod = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Unavailable period not found' });
     }
 
-    period.remove();
+    livreur.unavailablePeriods.pull(periodId);
     await livreur.save();
 
     const resource = new hal.Resource(

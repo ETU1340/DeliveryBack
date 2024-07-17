@@ -7,7 +7,13 @@ import { generateHALLinks } from '../services/halLinks';
 // Créer une planification
 export const createSchedule = async (req: Request, res: Response) => {
   const {livreurId, date, startTime, endTime, deliveries } = req.body;
-  let managerId = req.userConnected.id;
+  const userConnected = req.userConnected; // Ajoutez une variable intermédiaire
+
+  if (!userConnected) {
+    return res.status(401).json({ msg: 'User not authenticated' });
+  }
+
+  let managerId = userConnected.id;
   try {
     const schedule = new Schedule({ managerId, livreurId, date, startTime, endTime, deliveries });
     await schedule.save();

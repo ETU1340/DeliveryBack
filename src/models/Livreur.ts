@@ -3,6 +3,7 @@ import User from './User';
 
 // Interface pour les périodes d'indisponibilité
 interface IUnavailablePeriod {
+  _id: Schema.Types.ObjectId;
   startDate: Date;
   endDate: Date;
   reason: string;
@@ -14,7 +15,7 @@ interface ILivreur extends Document {
     type: 'Point';
     coordinates: [number, number];
   };
-  unavailablePeriods: IUnavailablePeriod[];
+  unavailablePeriods:  mongoose.Types.DocumentArray<IUnavailablePeriod>;
 }
 
 // Schéma pour les périodes d'indisponibilité
@@ -22,7 +23,7 @@ const UnavailablePeriodSchema = new Schema<IUnavailablePeriod>({
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   reason: { type: String, required: true }
-});
+}, { _id: true });
 
 // Schéma pour les livreurs
 const LivreurSchema = new Schema<ILivreur>({

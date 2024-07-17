@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-
+import {MANAGER,CLIENT,LIVREUR} from '../services/roleService'
 const options = { discriminatorKey: 'role', collection: 'users' };
 
 // Schéma de base pour tous les utilisateurs
@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   address: { type: String, required: true },
   phone: { type: String, required: true },
-  role: { type: String, required: true, enum: ['Manager', 'Livreur', 'Client'] },
+  role: { type: String, required: true, enum: [MANAGER,CLIENT,LIVREUR] },
 }, options);
 
 UserSchema.pre('save', async function(next) {

@@ -23,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
       user.set('currentLocation', { latitude, longitude });
     }
 
-    await user.save();
+   // await user.save();
 
     const resource = new hal.Resource(
       { message: 'User registered successfully' },
@@ -31,13 +31,17 @@ export const register = async (req: Request, res: Response) => {
     );
     const links = generateHALLinks(`/api/auth/register`, {
       login: { href: '/api/auth/login', method: 'POST' },
-      self: { href: '/api/auth/register', method: 'POST' }
     });
-    resource.link(links);
 
-    res.status(201).json(resource.toJSON());
-  } catch (error) {
-    res.status(400).json({ error });
+    for (const rel in links._links) {
+      if (links._links.hasOwnProperty(rel)) {
+          resource.link(rel, links._links[rel].href, links._links[rel].method);
+      }
+    }
+   console.log(resource);
+    return res.status(200).json(resource.toJSON());
+  } catch (error: any) {
+    return res.status(400).send({ error: error.message });
   }
 };
 
