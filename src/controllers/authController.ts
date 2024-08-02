@@ -10,8 +10,9 @@ dotenv.config();
 
 export const register = async (req: Request, res: Response) => {
   const { email, password, name, address, phone, role, companyName, latitude, longitude } = req.body;
-
+  console.log(req.body);
   try {
+
     const user = new User({ email, password, name, address, phone, role });
 
     // Ajouter les attributs spécifiques en fonction du rôle
@@ -36,10 +37,10 @@ export const register = async (req: Request, res: Response) => {
       if (links._links.hasOwnProperty(rel)) {
           resource.link(rel, links._links[rel].href, links._links[rel].method);
       }
-  }
+    }
 
-   console.log(resource);
-    return res.status(200).json(resource);
+    console.log(resource);
+    return res.status(200).send(resource);
   } catch (error: any) {
     return res.status(400).send({ error: error.message });
   }
@@ -48,32 +49,17 @@ export const register = async (req: Request, res: Response) => {
 // Connexion d'un utilisateur
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
+  console.log(req.body);
 
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      const resource = new hal.Resource(
-        { message: 'User not found' },
-        `/api/auth/login`
-      );
-      const links = generateHALLinks(`/api/auth/login`, {
-        register: { href: '/api/auth/register', method: 'POST' },
-        self: { href: '/api/auth/login', method: 'POST' }
-      });
-      return res.status(404).json(resource.toJSON());
+      return res.status(404).send({message:"User not found"});
     }
 
     const isMatch = bcrypt.compare(password, user.password);
     if (!isMatch) {
-      const resource = new hal.Resource(
-        { message: 'Invalid credentials' },
-        `/api/auth/login`
-      );
-      const links = generateHALLinks(`/api/auth/login`, {
-        register: { href: '/api/auth/register', method: 'POST' },
-        self: { href: '/api/auth/login', method: 'POST' }
-      });
-      return res.status(400).json(resource.toJSON());
+        return res.status(404).send({message:"Invalid credential"});
     }
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: '1h' });
@@ -86,7 +72,12 @@ export const login = async (req: Request, res: Response) => {
       logout: { href: '/api/auth/logout', method: 'POST' },
       self: { href: '/api/auth/login', method: 'POST' }
     });
-    resource.link(links);
+    
+    for (const rel in links._links) {
+      if (links._links.hasOwnProperty(rel)) {
+          resource.link(rel, links._links[rel].href, links._links[rel].method);
+      }
+    }
     res.status(200).json(resource.toJSON());
   } catch (error) {
     res.status(400).json({ error });
