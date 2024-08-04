@@ -6,4 +6,4 @@ const ManagerSchema = new mongoose.Schema({
 });
 
 const Manager = User.discriminator('Manager', ManagerSchema);
-export { Manager };
+export default Manager;

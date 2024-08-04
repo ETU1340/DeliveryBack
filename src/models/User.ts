@@ -6,8 +6,10 @@ const options = { discriminatorKey: 'role', collection: 'users' };
 // Schéma de base pour tous les utilisateurs
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
+  userName: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   name: { type: String, required: true },
+  firstName: { type: String, required: true },
   address: { type: String, required: true },
   phone: { type: String, required: true },
   role: { type: String, required: true, enum: [MANAGER,CLIENT,LIVREUR] },
@@ -20,9 +22,6 @@ UserSchema.pre('save', async function(next) {
   next();
 });
 
-UserSchema.methods.comparePassword = function(candidatePassword: string) {
-  return
-};
 
 const User = mongoose.model('User', UserSchema);
 export default User;

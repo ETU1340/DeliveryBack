@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
+import Livreur from '../models/Livreur';
+import Client from '../models/Client'
+import Manager from '../models/Manager';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 var hal = require('hal');
@@ -9,22 +12,14 @@ import bcrypt from 'bcryptjs';
 dotenv.config();
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password, name, address, phone, role, companyName, latitude, longitude } = req.body;
+  const { email, password, firstName,userName,name, address, phone, role, companyName} = req.body;
   console.log(req.body);
   try {
+    const manager = new Manager({ email,userName, password, name,firstName, address, phone, role,companyName});
+   //   user = new Client({ email, password, name, address, phone, role,companyName,deliveryRequests});
 
-    const user = new User({ email, password, name, address, phone, role });
 
-    // Ajouter les attributs spécifiques en fonction du rôle
-    if (role === MANAGER) {
-      user.set('companyName', companyName);
-    } else if (role === CLIENT) {
-      user.set('companyName', companyName);
-    } else if (role === LIVREUR) {
-      user.set('currentLocation', { latitude, longitude });
-    }
-
-    await user.save();
+    await manager.save();
 
     const resource = new hal.Resource(
       { message: 'User registered successfully' }
@@ -48,24 +43,25 @@ export const register = async (req: Request, res: Response) => {
 
 // Connexion d'un utilisateur
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { userName, password } = req.body;
   console.log(req.body);
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ userName });
     if (!user) {
       return res.status(404).send({message:"User not found"});
     }
 
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log(isMatch);
     if (!isMatch) {
         return res.status(404).send({message:"Invalid credential"});
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: '5h' });
 
     const resource = new hal.Resource(
-      { token },
+      { token,user },
       `/api/auth/login`
     );
     const links = generateHALLinks(`/api/auth/login`, {

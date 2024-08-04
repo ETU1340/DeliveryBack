@@ -1,16 +1,43 @@
 import { Request, Response } from 'express';
+import User  from '../models/User';
 import Livreur  from '../models/Livreur';
 var hal = require('hal');
+import {MANAGER,CLIENT,LIVREUR} from '../services/roleService'
 import { generateHALLinks } from '../services/halLinks';
-
+const { generatePassword } = require('../services/authService');
+const { sendEmails } = require('../services/emailService');
 // Créer un livreur
 export const createLivreur = async (req: Request, res: Response) => {
-    const { email, password, name, address, phone, latitude, longitude } = req.body;
+    const { email, name,firstName,userName, address, phone} = req.body;
+    const password = generatePassword(8);
+    console.log(req.body);
   
     try {
-      const livreur = new Livreur({ email, password, name, address, phone, role: 'Livreur', currentLocation: { latitude, longitude } });
+      const livreur = new Livreur({ email,userName, password, name,firstName, address, phone, LIVREUR});
       await livreur.save();
-  
+
+      const mailOptions = {
+        from: 'Company@gmail.com',
+        to: email,
+        subject: 'Vos informations de connexion',
+        html: `
+         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <h2 style="color: #4CAF50; text-align: center;">Vos informations de connexion</h2>
+        <p>Bonjour,</p>
+        <p>Vos informations de connexion sont les suivantes :</p>
+        <div style="text-align: center; margin: 20px 0;">
+            <p style="font-size: 18px;"><strong>Pseudo :</strong> ${userName}</p>
+            <p style="font-size: 18px;"><strong>Mot de passe :</strong> ${password}</p>
+              <p style="font-size: 18px;"><strong>Role : </strong> ${LIVREUR}</p>
+        </div>
+        <p style="color: #555;">Veuillez changer votre mot de passe dès votre première connexion.</p>
+        <p>Merci,</p>
+        <p>L'équipe Support</p>
+    </div>
+      `
+      };
+      await sendEmails(mailOptions,res);
+  /*
       const resource = new hal.Resource(
         { message: 'Livreur created successfully' },
         `/api/livreurs/${livreur._id}`
@@ -22,17 +49,19 @@ export const createLivreur = async (req: Request, res: Response) => {
         create: { href: `/api/livreurs`, method: 'POST' }
       });
       resource.link(links);
-  
-      res.status(201).json(resource.toJSON());
-    } catch (error) {
-      res.status(400).json({ error });
+  */
+    return res.status(201).json({error:false , message: 'livreur created' });
+    } catch (error :any) {
+      console.log(error.message);
+      res.status(400).json({ error:true,message:error.message });
     }
   };
   
   // Récupérer tous les livreurs
   export const getLivreurs = async (req: Request, res: Response) => {
     try {
-      const livreurs = await Livreur.find();
+      const livreurs = await Livreur.find({role:LIVREUR});
+      /*
       const resources = livreurs.map(livreur => {
         const resource = new hal.Resource(
           livreur.toObject(),
@@ -47,9 +76,10 @@ export const createLivreur = async (req: Request, res: Response) => {
         resource.link(links);
         return resource.toJSON();
       });
-      res.status(200).json(resources);
-    } catch (error) {
-      res.status(400).json({ error });
+      */
+      res.status(200).json(livreurs);
+    } catch (error:any) {
+      res.status(400).json({ erro:error.message });
     }
   };
   

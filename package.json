@@ -18,7 +18,8 @@
     "express-list-routes": "^1.2.1",
     "hal": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.4.4"
+    "mongoose": "^8.4.4",
+    "nodemailer": "^6.9.14"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

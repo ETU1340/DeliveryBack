@@ -6,4 +6,4 @@ const ClientSchema = new mongoose.Schema({
 });
 
 const Client = User.discriminator('Client', ClientSchema);
-export { Client };
+export default Client;
