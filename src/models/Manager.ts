@@ -1,7 +1,7 @@
-import User from './User';
 import mongoose from 'mongoose';
+import User from './User';
+
 const ManagerSchema = new mongoose.Schema({
-  companyName: { type: String, required: true },
   livreurs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 });
 

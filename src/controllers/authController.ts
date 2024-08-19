@@ -1,30 +1,29 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
-import Livreur from '../models/Livreur';
-import Client from '../models/Client'
 import Manager from '../models/Manager';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 var hal = require('hal');
 import { generateHALLinks } from '../services/halLinks';
 import {MANAGER,CLIENT,LIVREUR} from '../services/roleService'
+const { getImageUrl } = require('../services/userServices');
 import bcrypt from 'bcryptjs';
 dotenv.config();
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password, firstName,userName,name, address, phone, role, companyName} = req.body;
+  const { email, password, firstName,userName,name, address, phone, role} = req.body;
   console.log(req.body);
+  const image = await getImageUrl(req);
   try {
-    const manager = new Manager({ email,userName, password, name,firstName, address, phone, role,companyName});
-   //   user = new Client({ email, password, name, address, phone, role,companyName,deliveryRequests});
+    const manager = new Manager({ email,userName, password, name,image,firstName, address, phone, role});
 
 
-    await manager.save();
+   // await manager.save();
 
     const resource = new hal.Resource(
       { message: 'User registered successfully' }
     );
-    const links = generateHALLinks(`/api/auth/register`, {
+    const links = generateHALLinks('/api/auth/register', {
       login: { href: '/api/auth/login', method: 'POST' }
     });
 

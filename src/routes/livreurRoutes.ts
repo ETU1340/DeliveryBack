@@ -1,4 +1,5 @@
 import express from 'express';
+const upload = require('../middlewares/uploadMiddleware');
 import {
   createLivreur,
   getLivreurs,
@@ -13,7 +14,7 @@ import {
 
 const router = express.Router();
 
-router.post('/', createLivreur);
+router.post('/',upload.single('image'), createLivreur);
 router.get('/', getLivreurs);
 router.get('/:id', getLivreurById);
 router.get('/available', getAvailableLivreurs);

@@ -2,18 +2,20 @@ import { Request, Response } from 'express';
 import User  from '../models/User';
 import Livreur  from '../models/Livreur';
 var hal = require('hal');
-import {MANAGER,CLIENT,LIVREUR} from '../services/roleService'
+import {LIVREUR} from '../services/roleService'
 import { generateHALLinks } from '../services/halLinks';
 const { generatePassword } = require('../services/authService');
 const { sendEmails } = require('../services/emailService');
+const { getImageUrl } = require('../services/userServices');
+
 // Créer un livreur
 export const createLivreur = async (req: Request, res: Response) => {
     const { email, name,firstName,userName, address, phone} = req.body;
     const password = generatePassword(8);
-    console.log(req.body);
   
     try {
-      const livreur = new Livreur({ email,userName, password, name,firstName, address, phone, LIVREUR});
+      const image = await getImageUrl(req)
+      const livreur = new Livreur({ email,userName, password, name,image,firstName, address, phone, LIVREUR});
       await livreur.save();
 
       const mailOptions = {
@@ -77,6 +79,7 @@ export const createLivreur = async (req: Request, res: Response) => {
         return resource.toJSON();
       });
       */
+     console.log(livreurs);
       res.status(200).json(livreurs);
     } catch (error:any) {
       res.status(400).json({ erro:error.message });
@@ -115,13 +118,14 @@ export const createLivreur = async (req: Request, res: Response) => {
   export const updateLivreur = async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
+    console.log(updates);
   
     try {
-      const livreur = await Livreur.findByIdAndUpdate(id, updates, { new: true });
+      const livreur = await Livreur.findByIdAndUpdate(id, updates);
       if (!livreur) {
         return res.status(404).json({ message: 'Livreur not found' });
       }
-  
+  /*
       const resource = new hal.Resource(
         { message: 'Livreur updated successfully', ...livreur.toObject() },
         `/api/livreurs/${livreur._id}`
@@ -133,8 +137,8 @@ export const createLivreur = async (req: Request, res: Response) => {
         create: { href: `/api/livreurs`, method: 'POST' }
       });
       resource.link(links);
-  
-      res.status(200).json(resource.toJSON());
+  */
+      res.status(200).json({error:false,message:"livreur modifier avec succes"});
     } catch (error) {
       res.status(400).json({ error });
     }
