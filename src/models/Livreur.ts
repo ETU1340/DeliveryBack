@@ -12,6 +12,8 @@ interface IUnavailablePeriod {
 
 // Interface pour les livreurs
 interface ILivreur extends Document {
+  managerId:{ type: mongoose.Schema.Types.ObjectId, ref: 'User'};
+  moyenDeTransport:{ type: String, required: true };
   currentLocation: {
     latitude: number;
     longitude: number;
@@ -29,6 +31,8 @@ const UnavailablePeriodSchema = new Schema<IUnavailablePeriod>({
 
 // Schéma pour les livreurs
 const LivreurSchema = new Schema<ILivreur>({
+  managerId:{ type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+  moyenDeTransport:{ type: String, required: true },
   currentLocation: { // Stockage des coordonnées avec des champs latitude et longitude
     latitude: { type: Number},
     longitude: { type: Number }

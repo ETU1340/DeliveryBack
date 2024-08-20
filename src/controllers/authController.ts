@@ -11,14 +11,13 @@ import bcrypt from 'bcryptjs';
 dotenv.config();
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password, firstName,userName,name, address, phone, role} = req.body;
-  console.log(req.body);
+  const { email, password, firstName,userName,name, address, phone,companyName,province,location} = req.body;
   const image = await getImageUrl(req);
   try {
-    const manager = new Manager({ email,userName, password, name,image,firstName, address, phone, role});
+    const manager = new Manager({ email,userName, password, name,image,firstName, address, phone,MANAGER,companyName,province,location});
 
 
-   // await manager.save();
+    await manager.save();
 
     const resource = new hal.Resource(
       { message: 'User registered successfully' }
@@ -36,6 +35,7 @@ export const register = async (req: Request, res: Response) => {
     console.log(resource);
     return res.status(200).send(resource);
   } catch (error: any) {
+    console.log( error.message);
     return res.status(400).send({ error: error.message });
   }
 };
@@ -46,7 +46,8 @@ export const login = async (req: Request, res: Response) => {
   console.log(req.body);
 
   try {
-    const user = await User.findOne({ userName });
+    const user = await User.findOne({ userName: userName });
+    console.log(user);
     if (!user) {
       return res.status(404).send({message:"User not found"});
     }

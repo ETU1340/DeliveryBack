@@ -1,8 +1,6 @@
 import { Request } from 'express';
 const { DEFAULT_IMAGE_PROFILE,BASE_URL } = require('../services/utilsService');
 exports.getImageUrl = async (req: Request) => {
-
-
     let dirFileUrl = 'other';
     if (req.body.dirFileUrl) {
         dirFileUrl = req.body.dirFileUrl;

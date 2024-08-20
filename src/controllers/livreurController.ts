@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import User  from '../models/User';
 import Livreur  from '../models/Livreur';
 var hal = require('hal');
 import {LIVREUR} from '../services/roleService'
@@ -10,12 +9,25 @@ const { getImageUrl } = require('../services/userServices');
 
 // Créer un livreur
 export const createLivreur = async (req: Request, res: Response) => {
-    const { email, name,firstName,userName, address, phone} = req.body;
+
+  const {
+    email,
+    userName,
+    name,
+    firstName,
+    address,
+    phone,
+    moyenDeTransport,
+    longitude,
+    latitude
+  } = req.body;
+  console.log(req.body);
     const password = generatePassword(8);
-  
+    const managerId =  req.userConnected?.id;
+    console.log(managerId);
     try {
       const image = await getImageUrl(req)
-      const livreur = new Livreur({ email,userName, password, name,image,firstName, address, phone, LIVREUR});
+      const livreur = new Livreur({ email,userName, password, name,image,firstName, address, phone, LIVREUR,managerId,moyenDeTransport,currentLocation:{latitude,longitude}});
       await livreur.save();
 
       const mailOptions = {
@@ -60,9 +72,10 @@ export const createLivreur = async (req: Request, res: Response) => {
   };
   
   // Récupérer tous les livreurs
-  export const getLivreurs = async (req: Request, res: Response) => {
+  export const getLivreursByManager = async (req: Request, res: Response) => {
+    const id = req.userConnected?.id;
     try {
-      const livreurs = await Livreur.find({role:LIVREUR});
+      const livreurs = await Livreur.find({managerId:id});
       /*
       const resources = livreurs.map(livreur => {
         const resource = new hal.Resource(
@@ -117,7 +130,10 @@ export const createLivreur = async (req: Request, res: Response) => {
   // Mettre à jour un livreur
   export const updateLivreur = async (req: Request, res: Response) => {
     const { id } = req.params;
+    const {longitude,latitude} = req.body;
     const updates = req.body;
+    updates.currentLocation = {latitude,longitude};
+    updates.image = await getImageUrl(req)
     console.log(updates);
   
     try {
