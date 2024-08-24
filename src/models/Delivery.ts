@@ -1,25 +1,42 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-const DeliverySchema = new mongoose.Schema({
-  clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  livreurId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  status: { type: String, required: true, enum: ['Pending', 'In Progress', 'Completed'], default: 'Pending' },
-  deliveryDate: { type: Date, required: true },
-  startTime: { type: String, required: true }, // Utiliser le format ISO 8601 si possible (HH:mm:ss).
-  endTime: { type: String, required: true },   // Idem.
-  deliveryLocation: {
+// Interface for Delivery
+export interface IDelivery extends Document {
+  clientName: string;
+  clientSurname: string;
+  clientEmail: string;
+  validationCode: string;
+  reference: string;
+  deliveryAddress: {
+    latitude: number;
+    longitude: number;
+  };
+  deliveryDateTime: Date;  // Combined DateTime field
+  deliveryType: 'Urgent' | 'Standard';
+  status: 'En attente' | 'En cours' | 'Terminé' | 'Annulé';
+  livreurId?: mongoose.Schema.Types.ObjectId;
+  managerId: mongoose.Schema.Types.ObjectId;
+}
+
+// Delivery Schema
+const DeliverySchema: Schema = new Schema<IDelivery>({
+  clientName: { type: String, required: true },
+  clientSurname: { type: String, required: true },
+  clientEmail: { type: String, required: true },
+  validationCode: { type: String, required: true },
+  reference: { type: String, required: true },
+  deliveryAddress: {
     latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true }
+    longitude: { type: Number, required: true },
   },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  deliveryDateTime: { type: Date, required: true },  // Combined DateTime field
+  deliveryType: { type: String, enum: ['Urgent', 'Standard'], required: true },
+  status: { type: String, enum: ['En attente', 'En cours', 'Terminé', 'Annulé'], default: 'En attente' },
+  livreurId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+}, {
+  timestamps: true,
 });
 
-// Middleware pour mettre à jour la date de mise à jour
-DeliverySchema.pre('save', function(next) {
-  this.updatedAt = new Date();
-  next();
-});
-
-const Delivery = mongoose.model('Delivery', DeliverySchema);
+const Delivery = mongoose.model<IDelivery>('Delivery', DeliverySchema);
 export default Delivery;

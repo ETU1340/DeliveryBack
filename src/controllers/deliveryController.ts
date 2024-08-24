@@ -1,89 +1,67 @@
-import Delivery from '../models/Delivery';
 import { Request, Response } from 'express';
-var hal = require('hal');
-import { generateHALLinks } from '../services/halLinks';
+import Delivery from '../models/Delivery';
 
-// Créer une demande de livraison
-export const createDeliveryRequest = async (req: Request, res: Response) => {
-  const {deliveryDate, startTime, endTime, deliveryLat, deliveryLong } = req.body;
-  const userConnected = req.userConnected; // Ajoutez une variable intermédiaire
-
-  if (!userConnected) {
-    return res.status(401).json({ msg: 'User not authenticated' });
-  }
-  let clientId = userConnected.id; 
+// Create a new delivery
+export const createDelivery = async (req: Request, res: Response) => {
   try {
-    const deliveryLocation = {
-      type: 'Point',
-      coordinates: [parseFloat(deliveryLong), parseFloat(deliveryLat)]
-    };
-
-    const delivery = new Delivery({
-      clientId,
-      deliveryDate,
-      startTime,
-      endTime,
-      deliveryLocation
-    });
-
+    console.log(req.body);
+    const delivery = new Delivery(req.body);
     await delivery.save();
-
-    const resource = new hal.Resource(
-      { message: 'Delivery request created successfully', delivery: delivery.toObject() },
-      `/api/deliveries/${delivery._id}`
-    );
-    const links = generateHALLinks(`/api/deliveries/${delivery._id}`, {
-      self: { href: `/api/deliveries/${delivery._id}`, method: 'GET' },
-      list: { href: `/api/deliveries`, method: 'GET' },
-      update: { href: `/api/deliveries/${delivery._id}`, method: 'PUT' },
-      delete: { href: `/api/deliveries/${delivery._id}`, method: 'DELETE' }
-    });
-    resource.link(links);
-
-    res.status(201).json(resource.toJSON());
-  } catch (error) {
-    res.status(400).json({ error });
+    res.status(201).json({ success: true, message: 'Delivery created successfully', delivery });
+  } catch (error:any) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-export const validateDelivery = async (req: Request, res: Response) => {
-const { deliveryId } = req.params;
-const userConnected = req.userConnected; // Ajoutez une variable intermédiaire
+// List all deliveries
+export const listDeliveries = async (req: Request, res: Response) => {
+  try {
+    const id = req.userConnected?.id;
+    const deliveries = await Delivery.find({managerId:id}).populate('livreurId');
+    res.status(200).json(deliveries);
+  } catch (error:any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
 
-if (!userConnected) {
-  return res.status(401).json({ msg: 'User not authenticated' });
-}
-let clientId = userConnected.id; 
+// Update a delivery
+export const updateDelivery = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updatedDelivery = await Delivery.findByIdAndUpdate(id, req.body, { new: true }).populate('livreurId managerId');
+    if (!updatedDelivery) {
+      return res.status(404).json({ success: false, message: 'Delivery not found' });
+    }
+    res.status(200).json({ success: true, message: 'Delivery updated successfully', delivery: updatedDelivery });
+  } catch (error:any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
 
-try {
-    const delivery = await Delivery.findById(deliveryId);
+// Get a single delivery by ID
+export const getDeliveryById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const delivery = await Delivery.findById(id).populate('livreurId managerId');
     if (!delivery) {
-    return res.status(404).json({ message: 'Delivery not found' });
+      return res.status(404).json({ success: false, message: 'Delivery not found' });
     }
+    res.status(200).json({ success: true, delivery });
+  } catch (error:any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
 
-    // Vérifiez que le client validant la livraison est le même que celui qui a créé la livraison
-    if (delivery.clientId.toString() !== clientId) {
-    return res.status(403).json({ message: 'You are not authorized to validate this delivery' });
+// Delete a delivery
+export const deleteDelivery = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deletedDelivery = await Delivery.findByIdAndDelete(id);
+    if (!deletedDelivery) {
+      return res.status(404).json({ success: false, message: 'Delivery not found' });
     }
-
-    delivery.status = 'Completed';
-    delivery.updatedAt = new Date();
-    await delivery.save();
-
-    const resource = new hal.Resource(
-    { message: 'Delivery validated successfully', delivery: delivery.toObject() },
-    `/api/deliveries/${delivery._id}`
-    );
-    const links = generateHALLinks(`/api/deliveries/${delivery._id}`, {
-    self: { href: `/api/deliveries/${delivery._id}`, method: 'GET' },
-    list: { href: `/api/deliveries`, method: 'GET' },
-    update: { href: `/api/deliveries/${delivery._id}`, method: 'PUT' },
-    delete: { href: `/api/deliveries/${delivery._id}`, method: 'DELETE' }
-    });
-    resource.link(links);
-
-    res.status(200).json(resource.toJSON());
-} catch (error) {
-    res.status(400).json({ error });
-}
+    res.status(200).json({ success: true, message: 'Delivery deleted successfully' });
+  } catch (error:any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 };
