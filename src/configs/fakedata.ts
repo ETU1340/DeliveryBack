@@ -3,6 +3,7 @@ import Chance from 'chance';
 import Livreur from '../models/Livreur'; // Assurez-vous que le chemin est correct
 import Delivery from '../models/Delivery'; 
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
 // Initialiser Chance
 const chance = new Chance();
 dotenv.config();
@@ -13,13 +14,15 @@ mongoose.connect(process.env.MONGODB_URL!);
 // Fonction pour générer un livreur factice
 const createFakeLivreur = async () => {
   const managerId = "66c4b681d6b47115816e553e"; // Exemple d'ID de gestionnaire
-  
+  const mdp = "mdp2024";
+  const salt = await bcrypt.genSalt(10);
+  const password = await bcrypt.hash(mdp, salt);
   try {
     // Créer un livreur lié à cet utilisateur
     const livreur = new Livreur({
       email: chance.email(),
       userName: chance.word(),
-      password: chance.string({ length: 8 }),
+      password: password,
       name: chance.last(),
       image :"http://localhost:7000/uploads/other/default_man.png",
       firstName: chance.first(),
