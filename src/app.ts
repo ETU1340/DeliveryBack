@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes';
 import livreurRoutes from './routes/livreurRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
 import deliveryRoutes from './routes/deliveryRoutes';
+import discussionRoutes from './routes/discussionRoutes';
 import protect from './middlewares/auth';
 // Import other routes here
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/livreurs', protect,livreurRoutes);
 app.use('/api/schedules',protect, scheduleRoutes);
 app.use('/api/deliveries',protect, deliveryRoutes);
+app.use('/api/chats',protect, discussionRoutes);
 // Use other routes here
 
 const PORT = process.env.PORT || 5000;
