@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import User from './User';
+const mongoose = require('mongoose');
+const User = require('./User');
 
 const ManagerSchema = new mongoose.Schema({
   livreurs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -12,4 +12,4 @@ const ManagerSchema = new mongoose.Schema({
 });
 
 const Manager = User.discriminator('Manager', ManagerSchema);
-export default Manager;
+module.exports = Manager;

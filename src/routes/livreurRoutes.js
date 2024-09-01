@@ -1,6 +1,6 @@
-import express from 'express';
+const express = require('express');
 const upload = require('../middlewares/uploadMiddleware');
-import {
+const {
   createLivreur,
   getLivreursByManager,
   getLivreurById,
@@ -10,7 +10,7 @@ import {
   addUnavailablePeriod,
   updateUnavailablePeriod,
   deleteUnavailablePeriod
-} from '../controllers/livreurController';
+} = require('../controllers/livreurController');
 
 const router = express.Router();
 
@@ -27,4 +27,4 @@ router.put('/:livreurId/unavailable/:periodId', updateUnavailablePeriod);
 router.delete('/:livreurId/unavailable/:periodId', deleteUnavailablePeriod);
 
 
-export default router;
+module.exports = router;

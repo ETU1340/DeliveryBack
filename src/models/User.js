@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
-import { MANAGER, CLIENT, LIVREUR } from '../services/roleService';
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const { MANAGER, CLIENT, LIVREUR } = require('../services/roleService');
 
 const options = { discriminatorKey: 'role', collection: 'users' };
 
@@ -25,4 +25,4 @@ UserSchema.pre('save', async function(next) {
 });
 
 const User = mongoose.model('User', UserSchema);
-export default User;
+module.exports = User;

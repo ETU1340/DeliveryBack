@@ -1,5 +1,5 @@
-import express from 'express';
-import {
+const express = require('express');
+const {
   createSchedule,
   getSchedules,
   getScheduleById,
@@ -8,7 +8,7 @@ import {
   getSchedulesByManager,
   getSchedulesByLivreur,
   getTodaySchedulesForLivreur
-} from '../controllers/scheduleController';
+} = require('../controllers/scheduleController');;
 
 const router = express.Router();
 
@@ -21,4 +21,4 @@ router.get('/livreur/:livreurId/today', getTodaySchedulesForLivreur);
 router.put('/:id', updateSchedule);
 router.delete('/:id', deleteSchedule);
 
-export default router;
+module.exports = router;

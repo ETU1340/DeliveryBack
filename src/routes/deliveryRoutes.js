@@ -1,13 +1,12 @@
-import express from 'express';
-import {
+const express = require('express');
+const {  
   createDelivery,
   listDeliveries,
   updateDelivery,
   getDeliveryById,
   listDeliveriesByLivreur,
   deleteDelivery,
-  listDeliveriesByLivreurNow,
-} from '../controllers/deliveryController';
+  listDeliveriesByLivreurNow,} = require('../controllers/deliveryController');
 
 const router = express.Router();
 
@@ -20,4 +19,4 @@ router.get('/:id', getDeliveryById);
 router.put('/:id', updateDelivery);
 router.delete('/:id', deleteDelivery);
 
-export default router;
+module.exports = router;

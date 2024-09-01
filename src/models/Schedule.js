@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const ScheduleSchema = new mongoose.Schema({
   managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -10,4 +10,5 @@ const ScheduleSchema = new mongoose.Schema({
 });
 
 const Schedule = mongoose.model('Schedule', ScheduleSchema);
-export default Schedule;
+
+module.exports = Schedule;

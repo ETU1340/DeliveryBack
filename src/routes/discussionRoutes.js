@@ -7,4 +7,4 @@ router.get('/:delivererId/:managerId', discussionController.getDiscussion);
 
 
 
-export default router;
+module.exports = router;

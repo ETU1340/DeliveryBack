@@ -1,25 +1,8 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
-// Interface for Delivery
-export interface IDelivery extends Document {
-  clientName: string;
-  clientSurname: string;
-  clientEmail: string;
-  validationCode: string;
-  reference: string;
-  deliveryAddress: {
-    latitude: number;
-    longitude: number;
-  };
-  deliveryDateTime: Date;  // Combined DateTime field
-  deliveryType: 'Urgent' | 'Standard';
-  status: 'En attente' | 'En cours' | 'Terminé' | 'Annulé';
-  livreurId?: mongoose.Schema.Types.ObjectId;
-  managerId: mongoose.Schema.Types.ObjectId;
-}
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 // Delivery Schema
-const DeliverySchema: Schema = new Schema<IDelivery>({
+const DeliverySchema = new Schema({
   clientName: { type: String, required: true },
   clientSurname: { type: String, required: true },
   clientEmail: { type: String, required: true },
@@ -38,5 +21,5 @@ const DeliverySchema: Schema = new Schema<IDelivery>({
   timestamps: true,
 });
 
-const Delivery = mongoose.model<IDelivery>('Delivery', DeliverySchema);
-export default Delivery;
+const Delivery = mongoose.model('Delivery', DeliverySchema);
+module.exports = Delivery;
