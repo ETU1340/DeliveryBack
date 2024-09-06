@@ -1,8 +1,8 @@
 const Livreur = require('../models/Livreur');
-const { generateHALLinks } = require('../services/halLinks');
 const { generatePassword } = require('../services/authService');
 const { sendEmails } = require('../services/emailService');
 const { getImageUrl } = require('../services/userServices');
+const { LIVREUR } = require('../services/roleService');
 
 // Créer un livreur
 exports.createLivreur = async (req, res) => {
@@ -32,7 +32,7 @@ exports.createLivreur = async (req, res) => {
       firstName,
       address,
       phone,
-      role: 'LIVREUR',
+      role: LIVREUR,
       managerId,
       moyenDeTransport,
       currentLocation: { latitude, longitude }
