@@ -12,8 +12,8 @@ const DeliverySchema = new Schema({
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
   },
-  deliveryDateTime: { type: Date, required: true },  // Combined DateTime field
-  deliveryType: { type: String, enum: ['Urgent', 'Standard'], required: true },
+  deliveryDateTimeBegin: { type: Date, required: true },  // Combined DateTime field
+  deliveryDateTimeEnd: { type: Date, required: true },
   status: { type: String, enum: ['En attente', 'En cours', 'Terminé', 'Annulé'], default: 'En attente' },
   livreurId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
