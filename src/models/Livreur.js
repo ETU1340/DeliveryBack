@@ -7,7 +7,8 @@ const UnavailablePeriodSchema = new mongoose.Schema({
   _id: { type: mongoose.Schema.Types.ObjectId, auto: true }, // Génération automatique de l'ID
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  reason: { type: String, required: true }
+  reason: { type: String, required: true },
+  status : { type: String,enum: ['En attente', 'Approuvé', 'Refusé']}
 });
 
 // Schéma pour les livreurs

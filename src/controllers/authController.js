@@ -75,6 +75,7 @@ exports.login = async (req, res) => {
       }
     }
       */
+     console.log(user);
     res.status(200).json({ token, user });
   } catch (error) {
     res.status(400).json({ error });

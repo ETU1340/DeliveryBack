@@ -175,6 +175,7 @@ exports.getAvailableLivreurs = async (req, res) => {
 exports.addUnavailablePeriod = async (req, res) => {
   const { livreurId } = req.params;
   const { startDate, endDate, reason } = req.body;
+  console.log( req.body);
 
   try {
     const livreur = await Livreur.findById(livreurId);
@@ -182,7 +183,7 @@ exports.addUnavailablePeriod = async (req, res) => {
       return res.status(404).json({ message: 'Livreur not found' });
     }
 
-    livreur.unavailablePeriods.push({ startDate, endDate, reason });
+    livreur.unavailablePeriods.push({ startDate, endDate, reason, status:'En attente' });
     await livreur.save();
 
     res.status(201).json({ message: 'Unavailable period added successfully', unavailablePeriods: livreur.unavailablePeriods });

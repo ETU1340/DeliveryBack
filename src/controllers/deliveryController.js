@@ -47,7 +47,7 @@ exports.listDeliveriesByLivreurNow = async (req, res) => {
 
     const deliveries = await Delivery.find({
       livreurId: id,
-      deliveryDateTime: { $gte: today, $lt: tomorrow }, // Condition de date actuelle
+      deliveryDateTimeBegin: { $gte: today, $lt: tomorrow }, // Condition de date actuelle
       status: { $nin: ['Terminé', 'Annulé'] } // Status différent de 'Terminé' et 'Annulé'
     }).populate('livreurId');
     res.status(200).json(deliveries);
