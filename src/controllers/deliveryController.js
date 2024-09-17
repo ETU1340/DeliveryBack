@@ -1,13 +1,47 @@
 const Delivery = require('../models/Delivery');
-
+const { sendEmails } = require('../services/emailService');
 // Create a new delivery
 exports.createDelivery = async (req, res) => {
   try {
     console.log(req.body);
-    const delivery = new Delivery(req.body);
+    const {clientSurname,clientName,clientEmail,validationCode,reference,deliveryAddress,deliveryDateTime,deliveryEndDateTime,livreurId,managerId,status} = req.body;
+    const delivery = new Delivery({  
+      clientName,
+      clientSurname,
+      clientEmail,
+      validationCode,
+      reference,
+      deliveryAddress,
+      deliveryDateTimeBegin:deliveryDateTime,  // Combined DateTime field
+      deliveryDateTimeEnd:deliveryEndDateTime,
+      status,
+      livreurId,
+      managerId});
     await delivery.save();
+
+    const mailOptions = {
+      from: 'Company@gmail.com',
+      to: clientEmail,
+      subject: 'Votre code de validation pour la livraison',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h2 style="color: #4CAF50; text-align: center;">Votre code de validation</h2>
+          <p>Bonjour,</p>
+          <p>Nous vous informons que votre code de validation pour la réception de votre livraison est le suivant :</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <p style="font-size: 24px; font-weight: bold; color: #ff5722;">${validationCode}</p> <!-- Le code de validation est mis en avant -->
+          </div>
+          <p style="color: #555;">Veuillez fournir ce code au livreur lors de la livraison.</p>
+          <p>Merci pour votre confiance,</p>
+          <p>L'équipe Support</p>
+        </div>
+      `
+    };
+    
+    await sendEmails(mailOptions, res);
     res.status(201).json({ success: true, message: 'Delivery created successfully', delivery });
   } catch (error) {
+    console.log(error.message);
     res.status(400).json({ success: false, message: error.message });
   }
 };
