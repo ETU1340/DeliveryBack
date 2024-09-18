@@ -90,6 +90,8 @@ exports.listDeliveriesByLivreurNow = async (req, res) => {
   }
 };
 
+
+
 // Update a delivery
 exports.updateDelivery = async (req, res) => {
   try {

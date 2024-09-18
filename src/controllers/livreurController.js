@@ -96,6 +96,46 @@ exports.getLivreurById = async (req, res) => {
   }
 };
 
+// Fonction pour obtenir les livreurs disponibles
+exports.getLivreursDisponibles = async (req, res) => {
+  const { managerId, startDate, endDate } = req.query;
+
+  if (!managerId || !startDate || !endDate) {
+    return res.status(400).json({ message: 'Veuillez fournir un managerId, startDate et endDate' });
+  }
+
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // 1. Récupérer tous les livreurs du manager
+    const livreurs = await Livreur.find({ managerId });
+
+    // 2. Filtrer les livreurs qui n'ont pas de livraisons chevauchantes
+    const livreursDisponibles = [];
+
+    for (const livreur of livreurs) {
+      const livraisonChevauche = await Delivery.findOne({
+        livreurId: livreur._id,
+        status: { $in: ['En cours', 'En attente'] },
+        $or: [
+          { deliveryDateTime: { $lte: end }, deliveryEndDateTime: { $gte: start } },
+          { deliveryEndDateTime: { $gte: start, $lte: end } },
+        ],
+      });
+
+      if (!livraisonChevauche) {
+        livreursDisponibles.push(livreur);
+      }
+    }
+
+    return res.json(livreursDisponibles);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
 // Mettre à jour un livreur
 exports.updateLivreur = async (req, res) => {
   const { id } = req.params;
@@ -133,43 +173,7 @@ exports.deleteLivreur = async (req, res) => {
 };
 
 // Récupérer les livreurs disponibles les plus proches
-exports.getAvailableLivreurs = async (req, res) => {
-  const { deliveryDate, startTime, endTime, deliveryLat, deliveryLong } = req.query;
 
-  try {
-    const startDateTime = new Date(`${deliveryDate}T${startTime}:00Z`);
-    const endDateTime = new Date(`${deliveryDate}T${endTime}:00Z`);
-    const deliveryLocation = {
-      type: 'Point',
-      coordinates: [parseFloat(deliveryLong), parseFloat(deliveryLat)]
-    };
-
-    const livreurs = await Livreur.find({
-      currentLocation: {
-        $near: {
-          $geometry: deliveryLocation
-        }
-      },
-      $or: [
-        { unavailablePeriods: { $size: 0 } },
-        {
-          unavailablePeriods: {
-            $not: {
-              $elemMatch: {
-                startDate: { $lt: endDateTime },
-                endDate: { $gt: startDateTime }
-              }
-            }
-          }
-        }
-      ]
-    });
-
-    res.status(200).json({ count: livreurs.length, livreurs });
-  } catch (error) {
-    res.status(400).json({ error });
-  }
-};
 
 // Ajouter une période d'indisponibilité
 exports.addUnavailablePeriod = async (req, res) => {

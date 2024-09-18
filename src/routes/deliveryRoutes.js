@@ -6,7 +6,7 @@ const {
   getDeliveryById,
   listDeliveriesByLivreur,
   deleteDelivery,
-  listDeliveriesByLivreurNow,} = require('../controllers/deliveryController');
+  listDeliveriesByLivreurNow,getLivreursDisponibles} = require('../controllers/deliveryController');
 
 const router = express.Router();
 

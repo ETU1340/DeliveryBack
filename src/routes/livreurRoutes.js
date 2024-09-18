@@ -6,7 +6,7 @@ const {
   getLivreurById,
   updateLivreur,
   deleteLivreur,
-  getAvailableLivreurs,
+  getLivreursDisponibles,
   addUnavailablePeriod,
   updateUnavailablePeriod,
   deleteUnavailablePeriod
@@ -17,7 +17,7 @@ const router = express.Router();
 router.post('/',upload.single('image'), createLivreur);
 router.get('/', getLivreursByManager);
 router.get('/:id', getLivreurById);
-router.get('/available', getAvailableLivreurs);
+router.get('/available', getLivreursDisponibles);
 router.put('/:id',upload.single('image'), updateLivreur);
 router.delete('/:id', deleteLivreur);
 
