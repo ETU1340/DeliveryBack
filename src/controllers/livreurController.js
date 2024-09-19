@@ -1,9 +1,9 @@
-const Livreur = require('../models/Livreur');
 const { generatePassword } = require('../services/authService');
 const { sendEmails } = require('../services/emailService');
 const { getImageUrl } = require('../services/userServices');
 const { LIVREUR } = require('../services/roleService');
-
+const Livreur = require('../models/Livreur');
+const Delivery = require('../models/Delivery');
 // Créer un livreur
 exports.createLivreur = async (req, res) => {
   const {
@@ -99,6 +99,7 @@ exports.getLivreurById = async (req, res) => {
 // Fonction pour obtenir les livreurs disponibles
 exports.getLivreursDisponibles = async (req, res) => {
   const { managerId, startDate, endDate } = req.query;
+  console.log(req.query);
 
   if (!managerId || !startDate || !endDate) {
     return res.status(400).json({ message: 'Veuillez fournir un managerId, startDate et endDate' });
@@ -115,26 +116,34 @@ exports.getLivreursDisponibles = async (req, res) => {
     const livreursDisponibles = [];
 
     for (const livreur of livreurs) {
+      // Vérification si une livraison existe avec chevauchement
       const livraisonChevauche = await Delivery.findOne({
         livreurId: livreur._id,
         status: { $in: ['En cours', 'En attente'] },
         $or: [
-          { deliveryDateTime: { $lte: end }, deliveryEndDateTime: { $gte: start } },
-          { deliveryEndDateTime: { $gte: start, $lte: end } },
+          // Vérifie si la nouvelle livraison commence pendant une autre livraison
+          { deliveryDateTimeBegin: { $lte: end }, deliveryEndDateTime: { $gte: start } },
+          
+          // Ou vérifie si la livraison existante commence pendant la nouvelle livraison
+          { deliveryDateTimeBegin: { $gte: start, $lte: end } }
         ],
       });
 
+      // Si aucune livraison ne chevauche, le livreur est disponible
       if (!livraisonChevauche) {
         livreursDisponibles.push(livreur);
       }
     }
 
+    console.log(livreursDisponibles);
     return res.json(livreursDisponibles);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Erreur serveur' });
   }
 };
+
+
 
 // Mettre à jour un livreur
 exports.updateLivreur = async (req, res) => {

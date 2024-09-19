@@ -15,7 +15,7 @@ mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTop
 
 // Fonction pour générer un livreur factice
 const createFakeLivreur = async () => {
-  const managerId = "66c4b681d6b47115816e553e"; // Exemple d'ID de gestionnaire
+  const managerId = chance.pickone(["66c4b681d6b47115816e553e","66c4fa71821a99dfaca7d8e3"]); // Exemple d'ID de gestionnaire
   const mdp = "mdp2024";
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(mdp, salt);
@@ -27,7 +27,7 @@ const createFakeLivreur = async () => {
       userName: chance.word(),
       password: password,
       name: chance.last(),
-      image: "http://localhost:7000/uploads/other/default_man.png",
+      image: "https://delivery.psad.hco.mg/uploads/other/default_man.png",
       firstName: chance.first(),
       address: chance.address(),
       phone: chance.phone(),
@@ -57,7 +57,7 @@ const generateFakeDeliveries = async () => {
   let livreurId = chance.pickone(['66c84e294680ba4af1a9f5ed', '66c84e1a4680ba4af1a9f5e3', '66c84e264680ba4af1a9f5e7', '66c84e284680ba4af1a9f5ea']);
   let latitude = chance.pickone([-18.879190, -18.913370, -18.90560, -18.904372, -18.882374]);
   let longitude = chance.pickone([47.507905, 47.536131, 47.536243, 47.516005, 47.530491]);
-  let managerId = chance.pickone(['66c4b681d6b47115816e553e']);
+  let managerId = chance.pickone(['66c4b681d6b47115816e553e','66c4fa71821a99dfaca7d8e3']);
 
   try {
     // Générer la date et l'heure de début

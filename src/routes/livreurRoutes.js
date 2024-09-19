@@ -16,8 +16,8 @@ const router = express.Router();
 
 router.post('/',upload.single('image'), createLivreur);
 router.get('/', getLivreursByManager);
-router.get('/:id', getLivreurById);
 router.get('/available', getLivreursDisponibles);
+router.get('/:id', getLivreurById);
 router.put('/:id',upload.single('image'), updateLivreur);
 router.delete('/:id', deleteLivreur);
 
