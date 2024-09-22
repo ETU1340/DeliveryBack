@@ -40,20 +40,18 @@ exports.createLivreur = async (req, res) => {
     await livreur.save();
 
     const mailOptions = {
-      from: 'Company@gmail.com',
+      from: 'Company Name <DeliveryService@gmail.com>',
       to: email,
       subject: 'Vos informations de connexion',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
         <h2 style="color: #4CAF50; text-align: center;">Vos informations de connexion</h2>
         <p>Bonjour,</p>
-        <p>Vos informations de connexion sont les suivantes :</p>
+        <p>Vos informations de connexion en tant que livreur sont les suivantes :</p>
         <div style="text-align: center; margin: 20px 0;">
           <p style="font-size: 18px;"><strong>Pseudo :</strong> ${userName}</p>
           <p style="font-size: 18px;"><strong>Mot de passe :</strong> ${password}</p>
-          <p style="font-size: 18px;"><strong>Role :</strong> LIVREUR</p>
         </div>
-        <p style="color: #555;">Veuillez changer votre mot de passe dès votre première connexion.</p>
         <p>Merci,</p>
         <p>L'équipe Support</p>
         </div>
