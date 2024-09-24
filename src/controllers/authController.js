@@ -15,7 +15,7 @@ exports.register = async (req, res) => {
   const image = await getImageUrl(req);
 
   try {
-    const manager = new Manager({ email, userName, password, name, image, firstName, address, phone, role: MANAGER, companyName, province, location });
+    const manager = new Manager({ email, userName, password, name, image, firstName, address, phone,MANAGER, companyName, province, location });
 
     await manager.save();
 /*
@@ -32,7 +32,6 @@ exports.register = async (req, res) => {
       }
     }
 */
-    console.log(resource);
     return res.status(200).send({error:false,message:"user registered"});
   } catch (error) {
     console.log(error.message);

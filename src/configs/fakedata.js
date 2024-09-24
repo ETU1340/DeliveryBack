@@ -12,36 +12,61 @@ console.log(process.env.MONGODB_URL);
 
 // Connexion à la base de données MongoDB
 mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
-
-// Fonction pour générer un livreur factice
 const createFakeLivreur = async () => {
-  const managerId = chance.pickone(["66c4b681d6b47115816e553e","66c4fa71821a99dfaca7d8e3"]); // Exemple d'ID de gestionnaire
+  const managerId = chance.pickone(["66f1bb5c2ce12f8ae0db457e"]); // Exemple d'ID de gestionnaire 
   const mdp = "mdp2024";
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(mdp, salt);
 
+  // Obtenir la date actuelle
+  const today = new Date();
+
   try {
-    // Créer un livreur lié à cet utilisateur
+    let uniqueEmail, uniqueUserName;
+
+    // Boucle pour générer un email unique
+    do {
+      uniqueEmail = chance.email();
+    } while (await Livreur.findOne({ email: uniqueEmail }));
+
+    // Boucle pour générer un userName unique
+    do {
+      uniqueUserName = chance.word();
+    } while (await Livreur.findOne({ userName: uniqueUserName }));
+
+    // Créer un livreur avec des valeurs uniques
     const livreur = new Livreur({
-      email: chance.email(),
-      userName: chance.word(),
+      email: uniqueEmail,
+      userName: uniqueUserName,
       password: password,
       name: chance.last(),
-      image: "https://delivery.psad.hco.mg/uploads/other/default_man.png",
+      image: chance.pickone([
+        "https://delivery.psad.hco.mg/uploads/livreur/1.jpg",
+        "https://delivery.psad.hco.mg/uploads/livreur/3.jpg",
+        "https://delivery.psad.hco.mg/uploads/livreur/4.jpg",
+        "https://delivery.psad.hco.mg/uploads/livreur/5.jpg",
+        "https://delivery.psad.hco.mg/uploads/livreur/6.jpg",
+        "https://delivery.psad.hco.mg/uploads/livreur/7.jpg",
+        "https://delivery.psad.hco.mg/uploads/livreur/8.jpg",
+        "https://delivery.psad.hco.mg/uploads/livreur/9.jpg",
+      ]),
       firstName: chance.first(),
       address: chance.address(),
       phone: chance.phone(),
       role: 'livreur',
       managerId: managerId,
-      moyenDeTransport: chance.pickone(['Vélo', 'Moto', 'Voiture', 'Camion']), // Exemple de types de véhicules
+      moyenDeTransport: chance.pickone(['Vélo', 'Moto', 'Voiture', 'Camion']), // Types de véhicules
+
+      // Coordonnées aléatoires autour d'Antananarivo (approximation)
       currentLocation: {
-        latitude: chance.latitude(),
-        longitude: chance.longitude(),
+        latitude: chance.latitude({ min: -19.0, max: -18.7 }), // Antananarivo approx latitude range
+        longitude: chance.longitude({ min: 47.4, max: 47.6 }), // Antananarivo approx longitude range
       },
+
       unavailablePeriods: [
         {
-          startDate: chance.date({ year: 2023 }), // Une date passée
-          endDate: chance.date({ year: 2024 }),   // Une date future
+          startDate: chance.date({ year: today.getFullYear(), month: today.getMonth(), day: today.getDate() + chance.integer({ min: 1, max: 5 }) }), // Commence à partir de la date d'aujourd'hui
+          endDate: chance.date({ year: today.getFullYear(), month: today.getMonth(), day: today.getDate() + chance.integer({ min: 6, max: 30 }) }), // Termine dans un futur proche
           reason: chance.sentence({ words: 5 }),
         },
       ],
@@ -53,6 +78,8 @@ const createFakeLivreur = async () => {
     console.error('Erreur lors de la création du livreur :', err);
   }
 };
+
+
 const generateFakeDeliveries = async () => {
   let livreurId = chance.pickone(['66c84e294680ba4af1a9f5ed', '66c84e1a4680ba4af1a9f5e3', '66c84e264680ba4af1a9f5e7', '66c84e284680ba4af1a9f5ea']);
   let latitude = chance.pickone([-18.879190, -18.913370, -18.90560, -18.904372, -18.882374]);
@@ -99,9 +126,9 @@ const generateFakeDeliveries = async () => {
 
 // Générer plusieurs livreurs factices
 const generateFakeData = async () => {
-  for (let i = 0; i < 20; i++) { // Modifier le nombre pour générer plus ou moins de livreurs
-    // await createFakeLivreur();
-    await generateFakeDeliveries();
+  for (let i = 0; i < 50; i++) { // Modifier le nombre pour générer plus ou moins de livreurs
+    await createFakeLivreur();
+    //await generateFakeDeliveries();
   }
   mongoose.connection.close(); // Fermer la connexion après avoir terminé
 };
