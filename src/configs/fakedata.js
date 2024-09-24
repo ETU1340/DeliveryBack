@@ -13,7 +13,7 @@ console.log(process.env.MONGODB_URL);
 // Connexion à la base de données MongoDB
 mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 const createFakeLivreur = async () => {
-  const managerId = chance.pickone(["66f1bb5c2ce12f8ae0db457e"]); // Exemple d'ID de gestionnaire 
+  const managerId = chance.pickone(["66f231b1687f68eb4bcec119"]); // Exemple d'ID de gestionnaire 
   const mdp = "mdp2024";
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(mdp, salt);
@@ -79,44 +79,53 @@ const createFakeLivreur = async () => {
   }
 };
 
-
 const generateFakeDeliveries = async () => {
-  let livreurId = chance.pickone(['66c84e294680ba4af1a9f5ed', '66c84e1a4680ba4af1a9f5e3', '66c84e264680ba4af1a9f5e7', '66c84e284680ba4af1a9f5ea']);
-  let latitude = chance.pickone([-18.879190, -18.913370, -18.90560, -18.904372, -18.882374]);
-  let longitude = chance.pickone([47.507905, 47.536131, 47.536243, 47.516005, 47.530491]);
-  let managerId = chance.pickone(['66c4b681d6b47115816e553e','66c4fa71821a99dfaca7d8e3']);
+  let livreurId = chance.pickone([
+    '66f231e5d9fe9aeb6050f7ed', '66f231e6d9fe9aeb6050f7f4', '66f231e7d9fe9aeb6050f7f9', 
+    '66f231e8d9fe9aeb6050f7fe', '66f231e9d9fe9aeb6050f803', '66f231ead9fe9aeb6050f808',
+    // Ajoutez d'autres livreurId ici si nécessaire
+  ]);
+
+  // Localisations spécifiques à Antananarivo, Madagascar
+  let managerId = '66f231b1687f68eb4bcec119';  // Manager ID fixe
 
   try {
-    // Générer la date et l'heure de début
-    let deliveryDateTimeBegin = chance.date({ year: new Date().getFullYear(), month: new Date().getMonth() });
+    // Date de début - entre aujourd'hui et le 30 octobre
+    let today = new Date();
+    let deliveryDateTimeBegin = chance.date({
+      min: today,
+      max: new Date(today.getFullYear(), 9, 31)  // Octobre est le mois 9 en JavaScript
+    });
 
     // Générer une durée entre 1 heure (60 minutes) et 3 heures (180 minutes)
     let deliveryDuration = chance.integer({ min: 60, max: 180 }); // Durée en minutes
 
-    // Générer la date et l'heure de fin en ajoutant la durée à la date de début
+    // Calculer la date de fin en ajoutant la durée
     let deliveryDateTimeEnd = new Date(deliveryDateTimeBegin.getTime() + deliveryDuration * 60000);
 
-    // Générer un numéro de référence avec la forme "LIV - 010"
+    // Générer un numéro de référence avec la forme "LIV - XXX"
     let referenceNumber = `LIV - ${chance.integer({ min: 100, max: 999 })}`;
 
+    // Créer et sauvegarder la livraison
     const delivery = new Delivery({
       clientName: chance.first(),
-      clientSurname: chance.phone(),
+      clientSurname: chance.last(),
       clientEmail: chance.email(),
       validationCode: chance.string({ length: 10, pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' }),
-      reference: referenceNumber, // Nouvelle référence unique
+      reference: referenceNumber,  // Nouvelle référence unique
       deliveryAddress: {
-        latitude: latitude,
-        longitude: longitude,
+        latitude: chance.latitude({ min: -19.0, max: -18.7 }), // Antananarivo approx latitude range
+        longitude: chance.longitude({ min: 47.4, max: 47.6 }) // Antananarivo approx longitude range  latitude: latitude,
       },
-      deliveryDateTimeBegin: deliveryDateTimeBegin, // Date et heure de début
-      deliveryDateTimeEnd: deliveryDateTimeEnd,     // Date et heure de fin avec la durée
+      deliveryDateTimeBegin: deliveryDateTimeBegin,  // Date et heure de début
+      deliveryDateTimeEnd: deliveryDateTimeEnd,      // Date et heure de fin
       status: chance.pickone(['En attente', 'En cours', 'Terminé', 'Annulé']),
       livreurId: livreurId,
       managerId: managerId,
     });
 
-    await delivery.save(); 
+    // Sauvegarder la livraison
+    await delivery.save();
     console.log(`Fausses livraisons ont été générées avec succès.`);
   } catch (err) {
     console.error('Erreur lors de l\'insertion des livraisons factices:', err);
@@ -124,11 +133,12 @@ const generateFakeDeliveries = async () => {
 };
 
 
+
 // Générer plusieurs livreurs factices
 const generateFakeData = async () => {
   for (let i = 0; i < 50; i++) { // Modifier le nombre pour générer plus ou moins de livreurs
-    await createFakeLivreur();
-    //await generateFakeDeliveries();
+    //await createFakeLivreur();
+    await generateFakeDeliveries();
   }
   mongoose.connection.close(); // Fermer la connexion après avoir terminé
 };
