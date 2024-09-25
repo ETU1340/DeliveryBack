@@ -11,13 +11,11 @@ dotenv.config();
 console.log(process.env.MONGODB_URL);
 
 // Connexion à la base de données MongoDB
-mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+//mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 const createFakeLivreur = async () => {
   const managerId = chance.pickone(["66f231b1687f68eb4bcec119"]); // Exemple d'ID de gestionnaire 
   const mdp = "mdp2024";
-  const salt = await bcrypt.genSalt(10);
-  const password = await bcrypt.hash(mdp, salt);
-
+  const password = await bcrypt.hash(mdp, 5);
   // Obtenir la date actuelle
   const today = new Date();
 
@@ -68,6 +66,7 @@ const createFakeLivreur = async () => {
           startDate: chance.date({ year: today.getFullYear(), month: today.getMonth(), day: today.getDate() + chance.integer({ min: 1, max: 5 }) }), // Commence à partir de la date d'aujourd'hui
           endDate: chance.date({ year: today.getFullYear(), month: today.getMonth(), day: today.getDate() + chance.integer({ min: 6, max: 30 }) }), // Termine dans un futur proche
           reason: chance.sentence({ words: 5 }),
+          status: chance.pickone(['En attente', 'Approuvé', 'Refusé'])
         },
       ],
     });
@@ -136,11 +135,11 @@ const generateFakeDeliveries = async () => {
 
 // Générer plusieurs livreurs factices
 const generateFakeData = async () => {
-  for (let i = 0; i < 50; i++) { // Modifier le nombre pour générer plus ou moins de livreurs
-    //await createFakeLivreur();
-    await generateFakeDeliveries();
+  for (let i = 0; i < 70; i++) { // Modifier le nombre pour générer plus ou moins de livreurs
+    await createFakeLivreur();
+    //await generateFakeDeliveries();
   }
   mongoose.connection.close(); // Fermer la connexion après avoir terminé
 };
-
-generateFakeData();
+//createFakeLivreur()
+//generateFakeData();
