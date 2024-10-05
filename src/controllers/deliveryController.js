@@ -47,7 +47,7 @@ exports.createDelivery = async (req, res) => {
 };
 
 // List all deliveries
-exports.listDeliveries = async (req, res) => {
+exports.listDeliveriesNow = async (req, res) => {
   try {
     const id = req.userConnected ? req.userConnected.id : null;
      // Récupération de la date actuelle sans l'heure (à minuit)
@@ -64,6 +64,18 @@ exports.listDeliveries = async (req, res) => {
       status: { $nin: ['Terminé', 'Annulé'] },
 
      }).populate('livreurId');
+     console.log(deliveries);
+    res.status(200).json(deliveries);
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.listDeliveries = async (req, res) => {
+  try {
+    const id = req.userConnected ? req.userConnected.id : null;
+    const deliveries = await Delivery.find({
+      managerId: id}).populate('livreurId');
     res.status(200).json(deliveries);
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
